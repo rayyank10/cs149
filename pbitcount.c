@@ -14,7 +14,7 @@ int countSetBits(int n) {
 }
 
 int main(int argc, char **argv) {
-    int Bitcount(char *filein);
+    int Bitcount(char *file);
 
     int bit = 0;
     int totalbits = 0;
@@ -49,23 +49,24 @@ int main(int argc, char **argv) {
     }
 }
 
-int Bitcount(char* filein){
+int Bitcount(char* file){
 
-    char *filename = filein;
-    FILE *file;
-    file = fopen(filename, "r");
-    if(file == NULL){
-        perror(filein);
+    char *filename = file;
+    FILE *fh;
+    fh = fopen(filename, "r");
+    if(!fh){
+        perror(file);
+        printf("$ echo $?\n");
         _exit(2);
     }
     //initialize the ch variable and the ab variable
-    int ch = fgetc(file);
+    int ch = fgetc(fh);
     int bit = 0;
     //while ch doesnt reach the end of file keep getting each integer and counting the set bits and add them to the bit variable
     while (ch != EOF) {
         bit = bit + countSetBits(ch);
-        ch = fgetc(file);
+        ch = fgetc(fh);
     }
-    fclose(file);
+    fclose(fh);
     return bit;
 }
