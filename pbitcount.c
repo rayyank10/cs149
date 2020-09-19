@@ -15,15 +15,17 @@ int countSetBits(int n) {
 
 int main(int argc, char **argv) {
     int Bitcount(char *file);
-
     int bit = 0;
     int totalbits = 0;
     int pid;
     int fds[2];
     pipe(fds);
+   //check to see if there is an appropriate amount of arguments
     if (argc >= 3) {
         for (int i = 1; i < argc; i++) {
             pid = fork();
+            //check to see if its the child process
+            //Then check to see if the fork fails
             if (pid == 0) {
                 totalbits += Bitcount(argv[i]);
                 write(fds[1], &totalbits, sizeof(totalbits));
@@ -41,6 +43,7 @@ int main(int argc, char **argv) {
         printf("%i\n", bit);
         return 0;
     }
+      //if less than 3 arguments print usage statements
         else if (argc <= 2) {
             printf("USAGE: %s  filename \n", argv[1]);
             printf("%s %s \n", argv[0], argv[1]);
