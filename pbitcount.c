@@ -57,7 +57,7 @@ int Bitcount(char* file){
     char *filename = file;
     FILE *fh;
     fh = fopen(filename, "r");
-    if(!fh){
+    if(fh == NULL){
         perror(file);
         printf("$ echo $?\n");
         _exit(2);
