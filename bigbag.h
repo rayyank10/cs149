@@ -9,8 +9,8 @@
 struct bigbag_hdr_s
 {    
 uint32_t magic;    // these offsets are from the beginning of the bagfile or 0 if not set    
-uint32_t first_free;    u
-int32_t first_element;};
+uint32_t first_free;    
+uint32_t first_element;};
 
 struct bigbag_entry_s {    
 uint32_t next;    
