@@ -56,13 +56,15 @@ int main(int argc, char **argv) {
 
     // Header is now the file
     struct bigbag_hdr_s *hdr = file_base;
-    struct bigbag_entry_s *first_entry = file_base + hdr->first_free;
 
+    struct bigbag_entry_s *first_entry = file_base + 12;
     //entry_addr(hdr,hdr->first_free)->next = 0;
+
 
 
     struct stat stat;
     fstat(fd, &stat);
+     //int filesize = stat.st_size;
     //if the file does not exist create a new file
     if(stat.st_size != BIGBAG_SIZE)
     {
@@ -199,3 +201,7 @@ int main(int argc, char **argv) {
 
     }
 }
+
+//edge case for add(bottom) check(edge cases)
+//(test out of space)
+// make it into its own file, empty file initialize the linked list
