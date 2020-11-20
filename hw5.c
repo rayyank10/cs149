@@ -5,8 +5,9 @@
 #include <pthread.h>
 #include <sys/time.h>
 
+
 typedef struct __node_t {
-    int key;
+    char key;
     struct __node_t *next;
 } node_t;
 
@@ -21,7 +22,7 @@ void List_Init(list_t *L) {
     pthread_mutex_init(&L->lock, NULL);
 }
 
-int List_Insert(list_t *L, int key) {
+int List_Insert(list_t *L, char key) {
     // synchronization not needed
     node_t *new = malloc(sizeof(node_t));
     if (new == NULL) {
@@ -35,7 +36,7 @@ int List_Insert(list_t *L, int key) {
     L->head = new;
     pthread_mutex_unlock(&L->lock);
 }
-int List_Lookup(list_t *L, int key) {
+int List_Lookup(list_t *L, char key) {
     int rv = -1;
     pthread_mutex_lock(&L->lock);
     node_t *curr = L->head;
@@ -80,30 +81,87 @@ int Hash_Insert(hash_t *H, char* key) {
 int Hash_Lookup(hash_t *H, char* key) {
     return List_Lookup(&H->lists[hash(key) % BUCKETS], key);
 }
+#define MAX_WORDS   1000
 
-static volatile int counter = 0;
-pthread_mutex_t lock;
-void *mythread(void *arg)
-{
-    printf("/s: begin\n",(char *)arg);
-    for(int i = 0; i <1e7; i++)
-    {
-        pthread_mutex_lock(&lock);
-        counter = counter + 1;
-        pthread_mutex_unlock(&lock);
-    }
-    printf("%s: done\n",(char *)arg);
-}
 int main(int argc, char **argv) {
-   pthread_t p1,p2;
-   pthread_mutex_init(&lock,NULL);
-   printf("counter = %d\n",counter);
-   pthread_create(&p1,NULL,mythread,"A");
-    pthread_create(&p2,NULL,mythread,"B");
 
-    pthread_join(p1, NULL);
-    pthread_join(p2, NULL);
+    hash_t *hash1;
+    FILE *fptr;
+    char path[100];
+    int i, len, index, isUnique;
 
-    printf("counter = %d\n", counter);
+    //Hash_Insert(hash1,"Batman");
+
+
+    // List of distinct words
+    char words[MAX_WORDS][50];
+    char word[50];
+
+    // Count of distinct words
+    int  count[MAX_WORDS];
+
+
+    /* Input file path */
+    printf("Enter file path: ");
+    scanf("%s", path);
+
+
+    /* Try to open file */
+    fptr = fopen(path, "r");
+
+    /* Exit if file not opened successfully */
+    if (fptr == NULL)
+    {
+        printf("Unable to open file.\n");
+        printf("Please check you have read previleges.\n");
+
+        exit(EXIT_FAILURE);
+    }
+
+    // Initialize words count to 0
+    for (i=0; i<MAX_WORDS; i++)
+        count[i] = 0;
+
+
+
+
+    index = 0;
+    int bigcount;
+    while (fscanf(fptr, "%s", word) != EOF)
+    {
+
+        // Check if word exits in list of all distinct words
+        isUnique = 1;
+        for (i=0; i<index && isUnique; i++)
+        {
+            if (strcmp(words[i], word) == 0)
+                isUnique = 0;
+        }
+
+        // If word is unique then add it to distinct words list
+        // and increment index. Otherwise increment occurrence
+        // count of current word.
+        if (isUnique)
+        {
+            //Hash_Insert(hash1,word);
+            strcpy(words[index], word);
+            count[index]++;
+            bigcount ++;
+            index++;
+        }
+        else
+        {
+            count[i - 1]++;
+        }
+    }
+
+    // Close file
+    fclose(fptr);
+
+        printf("%d",bigcount);
+
+
+    return 0;
 
 }
+
