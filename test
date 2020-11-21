@@ -1,2 +1,36 @@
-(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)(null)0
-z
+int List_Insert(list_t *L, char* key) {
+    // synchronization not needed
+    int rv =1;
+    int count = 0;
+    node_t *new = malloc(sizeof(node_t));
+    if (new == NULL) {
+        perror("malloc");
+    }
+    new->key = key;
+
+    // just lock critical section
+    pthread_mutex_lock(&L->lock);
+    node_t *curr = L->head;
+    while(curr != NULL)
+    {
+        if(curr->key != key)
+        {
+            count++;
+            rv = 0;
+            break;
+        }
+            curr = curr->next;
+
+
+    }
+    if(rv==1)
+    {
+        new->next = L->head;
+        L->head = new;
+    }
+    printf("%s",count);
+    pthread_mutex_unlock(&L->lock);
+
+
+
+}
