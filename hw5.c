@@ -41,7 +41,7 @@ int List_Lookup(list_t *L, char* key) {
     pthread_mutex_lock(&L->lock);
     node_t *curr = L->head;
     while (curr) {
-        if (curr->key == key) {
+        if (strcmp(curr->key,key)==0) {
             rv = 0;
             break;
         }
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
         isUnique = 1;
         for (i=0; i<index && isUnique; i++)
         {
-            if (strcmp(words[i], word) == 0)
+            if (Hash_Lookup(hash1,word))
                 isUnique = 0;
         }
 
@@ -162,5 +162,3 @@ int main(int argc, char **argv) {
     return 0;
 
 }
-
-
