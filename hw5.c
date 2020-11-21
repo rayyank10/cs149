@@ -1,11 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <threads.h>
-#include <pthread.h>
-#include <sys/time.h>
-
-
 typedef struct __node_t {
     char key;
     struct __node_t *next;
@@ -22,7 +14,7 @@ void List_Init(list_t *L) {
     pthread_mutex_init(&L->lock, NULL);
 }
 
-int List_Insert(list_t *L, char key) {
+int List_Insert(list_t *L, char* key) {
     // synchronization not needed
     node_t *new = malloc(sizeof(node_t));
     if (new == NULL) {
@@ -36,7 +28,7 @@ int List_Insert(list_t *L, char key) {
     L->head = new;
     pthread_mutex_unlock(&L->lock);
 }
-int List_Lookup(list_t *L, char key) {
+int List_Lookup(list_t *L, char* key) {
     int rv = -1;
     pthread_mutex_lock(&L->lock);
     node_t *curr = L->head;
@@ -85,14 +77,13 @@ int Hash_Lookup(hash_t *H, char* key) {
 
 int main(int argc, char **argv) {
 
-    hash_t *hash1;
+    hash_t *hash1 = malloc(sizeof(hash_t));
+    Hash_Init(hash1);
+
     FILE *fptr;
+
     char path[100];
     int i, len, index, isUnique;
-
-    //Hash_Insert(hash1,"Batman");
-
-
     // List of distinct words
     char words[MAX_WORDS][50];
     char word[50];
@@ -113,7 +104,6 @@ int main(int argc, char **argv) {
     if (fptr == NULL)
     {
         printf("Unable to open file.\n");
-        printf("Please check you have read previleges.\n");
 
         exit(EXIT_FAILURE);
     }
@@ -143,13 +133,13 @@ int main(int argc, char **argv) {
         // count of current word.
         if (isUnique)
         {
-            //Hash_Insert(hash1,word);
+            Hash_Insert(hash1,word);
             strcpy(words[index], word);
             count[index]++;
             bigcount ++;
             index++;
         }
-        else
+      else
         {
             count[i - 1]++;
         }
@@ -164,4 +154,5 @@ int main(int argc, char **argv) {
     return 0;
 
 }
+
 
