@@ -5,9 +5,8 @@
 #include <pthread.h>
 #include <sys/time.h>
 
-
 typedef struct __node_t {
-    char key;
+    char* key;
     struct __node_t *next;
 } node_t;
 
@@ -38,6 +37,7 @@ int List_Insert(list_t *L, char* key) {
 }
 int List_Lookup(list_t *L, char* key) {
     int rv = -1;
+
     pthread_mutex_lock(&L->lock);
     node_t *curr = L->head;
     while (curr) {
@@ -51,7 +51,7 @@ int List_Lookup(list_t *L, char* key) {
     return rv; // now both success and failure
 }
 
-#define BUCKETS (101)
+#define BUCKETS (256)
 typedef struct __hash_t {
     list_t lists[BUCKETS];
 } hash_t;
@@ -81,84 +81,64 @@ int Hash_Insert(hash_t *H, char* key) {
 int Hash_Lookup(hash_t *H, char* key) {
     return List_Lookup(&H->lists[hash(key) % BUCKETS], key);
 }
-#define MAX_WORDS   1000
+
+
 
 int main(int argc, char **argv) {
-
     hash_t *hash1 = malloc(sizeof(hash_t));
     Hash_Init(hash1);
 
-    FILE *fptr;
+    char *word[50];
 
-    char path[100];
-    int i, len, index, isUnique;
-    // List of distinct words
-    char words[MAX_WORDS][50];
-    char word[50];
-
-    // Count of distinct words
-    int  count[MAX_WORDS];
-
-
-    /* Input file path */
-    printf("Enter file path: ");
-    scanf("%s", path);
-
-
-    /* Try to open file */
-    fptr = fopen(path, "r");
-
-    /* Exit if file not opened successfully */
-    if (fptr == NULL)
+    FILE *file;
+    file = fopen(argv[1],"r");
+    if(file==NULL)
     {
-        printf("Unable to open file.\n");
-
-        exit(EXIT_FAILURE);
+        perror(argv[1]);
+        exit(2);
     }
-
-    // Initialize words count to 0
-    for (i=0; i<MAX_WORDS; i++)
-        count[i] = 0;
-
-
-
-
-    index = 0;
     int bigcount;
-    while (fscanf(fptr, "%s", word) != EOF)
+    while (fscanf(file, "%s", &word) != EOF)
     {
 
-        // Check if word exits in list of all distinct words
-        isUnique = 1;
-        for (i=0; i<index && isUnique; i++)
-        {
-            if (Hash_Lookup(hash1,word))
-                isUnique = 0;
+        if(Hash_Lookup(hash1,&word)){
+            Hash_Insert(hash1,&word);
+            bigcount++;
+        }
+        else{
+            printf("%s is not a unique word \n",word);
         }
 
-        // If word is unique then add it to distinct words list
-        // and increment index. Otherwise increment occurrence
-        // count of current word.
-        if (isUnique)
-        {
-            Hash_Insert(hash1,word);
-            strcpy(words[index], word);
-            count[index]++;
-            bigcount ++;
-            index++;
-        }
-      else
-        {
-            count[i - 1]++;
-        }
+
+
     }
+
+
 
     // Close file
-    fclose(fptr);
+    fclose(file);
 
-        printf("%d",bigcount);
+    printf("%d",bigcount);
+
+//    Hash_Insert(hash1,"irishmen");
+//    if(!Hash_Lookup(hash1,"irishmen"))
+//    {
+//        printf("here");
+//    }
+//    else
+//    {
+//        printf("not here");
+//    }
 
 
     return 0;
+
+
+
+
+
+
+
+
 
 }
