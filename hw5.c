@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <threads.h>
 #include <pthread.h>
-#include <sys/time.h>
-#include <stdarg.h>
+int count;
+
 typedef struct __node_t {
     char* key;
     struct __node_t *next;
@@ -28,7 +27,7 @@ int List_Insert(list_t *L, char* key) {
         perror("malloc");
     }
     new->key = key;
-
+    count++;
     // just lock critical section
     pthread_mutex_lock(&L->lock);
     new->next = L->head;
@@ -84,9 +83,10 @@ int Hash_Lookup(hash_t *H, char* key) {
 
 static volatile int bigcount;
 pthread_mutex_t lock;
+
 void *unique_Words(char *file_name,hash_t *H)
 {
-    char *word[50];
+    char *word;
     FILE *file;
     file = fopen(file_name,"r");
     if(file==NULL)
@@ -94,20 +94,20 @@ void *unique_Words(char *file_name,hash_t *H)
         perror(file_name);
         exit(2);
     }
-    while (fscanf(file, "%s", &word) != EOF)
+    while (fscanf(file, "%ms", &word) != EOF)
     {
-       
-        if(Hash_Lookup(H,&word)){
-            pthread_mutex_lock(&lock);
-            Hash_Insert(H,&word);
+        pthread_mutex_lock(&lock);
+        if(Hash_Lookup(H,word)){
+            Hash_Insert(H,word);
             bigcount++;
-            pthread_mutex_unlock(&lock);
-        }
 
+        }
+        pthread_mutex_unlock(&lock);
     }
     // Close file
     fclose(file);
 }
+
 
 
 
@@ -125,5 +125,7 @@ int main(int argc, char **argv) {
 
 }
 
-    printf("%d \n",bigcount);
+    printf("%d \n",count);
 }
+
+
