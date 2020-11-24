@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <threads.h>
 #include <pthread.h>
-#include <sys/time.h>
+int count;
 
 typedef struct __node_t {
-    int key;
+    char* key;
     struct __node_t *next;
 } node_t;
 
@@ -21,26 +20,27 @@ void List_Init(list_t *L) {
     pthread_mutex_init(&L->lock, NULL);
 }
 
-int List_Insert(list_t *L, int key) {
+int List_Insert(list_t *L, char* key) {
     // synchronization not needed
     node_t *new = malloc(sizeof(node_t));
     if (new == NULL) {
         perror("malloc");
     }
     new->key = key;
-
     // just lock critical section
     pthread_mutex_lock(&L->lock);
     new->next = L->head;
     L->head = new;
+    count++;
     pthread_mutex_unlock(&L->lock);
 }
-int List_Lookup(list_t *L, int key) {
+int List_Lookup(list_t *L, char* key) {
     int rv = -1;
+
     pthread_mutex_lock(&L->lock);
     node_t *curr = L->head;
     while (curr) {
-        if (curr->key == key) {
+        if (strcmp(curr->key,key)==0) {
             rv = 0;
             break;
         }
@@ -50,7 +50,7 @@ int List_Lookup(list_t *L, int key) {
     return rv; // now both success and failure
 }
 
-#define BUCKETS (101)
+#define BUCKETS (256)
 typedef struct __hash_t {
     list_t lists[BUCKETS];
 } hash_t;
@@ -81,29 +81,56 @@ int Hash_Lookup(hash_t *H, char* key) {
     return List_Lookup(&H->lists[hash(key) % BUCKETS], key);
 }
 
-static volatile int counter = 0;
-pthread_mutex_t lock;
-void *mythread(void *arg)
+struct _args
 {
-    printf("/s: begin\n",(char *)arg);
-    for(int i = 0; i <1e7; i++)
+    char *argv;
+    struct hash_t *hash ;
+};
+pthread_mutex_t lock;
+
+void *unique_Words(void *v)
+{
+    struct _args *args  = v;
+    char *word;
+    FILE *file;
+    file = fopen(args->argv,"r");
+    if(file==NULL)
+    {
+        perror(args->argv);
+        exit(2);
+    }
+    while (fscanf(file, "%ms", &word) != EOF)
     {
         pthread_mutex_lock(&lock);
-        counter = counter + 1;
+        if(Hash_Lookup(args->hash,word)){
+            Hash_Insert(args->hash,word);
+
+        }
         pthread_mutex_unlock(&lock);
     }
-    printf("%s: done\n",(char *)arg);
+    // Close file
+    fclose(file);
 }
+
+
+
+
 int main(int argc, char **argv) {
-   pthread_t p1,p2;
-   pthread_mutex_init(&lock,NULL);
-   printf("counter = %d\n",counter);
-   pthread_create(&p1,NULL,mythread,"A");
-    pthread_create(&p2,NULL,mythread,"B");
+    struct _args arguments;
+    hash_t *hash1 = malloc(sizeof(hash_t));
+    Hash_Init(hash1);
+    arguments.hash = hash1;
+    int size = argc;
+    pthread_t tid[argc];
+    pthread_mutex_init(&lock,NULL);
 
-    pthread_join(p1, NULL);
-    pthread_join(p2, NULL);
+    for(int i = 1; i<size; i++)
+{
+        arguments.argv = argv[i];
+       pthread_create(&tid[i],NULL,unique_Words,&arguments);
 
-    printf("counter = %d\n", counter);
 
+}
+
+    printf("%d \n",count);
 }
