@@ -32,6 +32,7 @@ int List_Insert(list_t *L, char* key) {
     new->next = L->head;
     L->head = new;
     count++;
+
     pthread_mutex_unlock(&L->lock);
 }
 int List_Lookup(list_t *L, char* key) {
@@ -128,8 +129,7 @@ int main(int argc, char **argv) {
 {
         arguments.argv = argv[i];
        pthread_create(&tid[i],NULL,unique_Words,&arguments);
-
-
+       pthread_join(tid[i],NULL);
 }
 
     printf("%d \n",count);
