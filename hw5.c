@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <threads.h>
 #include <pthread.h>
-#include <sys/time.h>
-
 typedef struct __node_t {
     char* key;
     struct __node_t *next;
@@ -82,63 +79,48 @@ int Hash_Lookup(hash_t *H, char* key) {
     return List_Lookup(&H->lists[hash(key) % BUCKETS], key);
 }
 
+static volatile int bigcount;
+pthread_mutex_t lock;
+void *unique_Words(char *file_name,hash_t *H)
+{
+    char *word;
+    FILE *file;
+    file = fopen(file_name,"r");
+    if(file==NULL)
+    {
+        perror(file_name);
+        exit(2);
+    }
+    while (fscanf(file, "%ms", &word) != EOF)
+    {
+
+        if(Hash_Lookup(H,word)){
+            pthread_mutex_lock(&lock);
+            Hash_Insert(H,word);
+            bigcount++;
+            pthread_mutex_unlock(&lock);
+        }
+
+    }
+    // Close file
+    fclose(file);
+}
+
 
 
 int main(int argc, char **argv) {
     hash_t *hash1 = malloc(sizeof(hash_t));
     Hash_Init(hash1);
+    int size = argc;
+    pthread_t tid[argc];
+    pthread_mutex_init(&lock,NULL);
 
-    char *word[50];
-
-    FILE *file;
-    file = fopen(argv[1],"r");
-    if(file==NULL)
-    {
-        perror(argv[1]);
-        exit(2);
-    }
-    int bigcount;
-    while (fscanf(file, "%s", &word) != EOF)
-    {
-
-        if(Hash_Lookup(hash1,&word)){
-            Hash_Insert(hash1,&word);
-            bigcount++;
-        }
-        else{
-            printf("%s is not a unique word \n",word);
-        }
+    for(int i = 1; i<size-1; i++)
+{
+       pthread_create(&tid[i],NULL,unique_Words,unique_Words(argv[i],hash1));
 
 
+}
 
-    }
-
-
-
-    // Close file
-    fclose(file);
-
-    printf("%d",bigcount);
-
-//    Hash_Insert(hash1,"irishmen");
-//    if(!Hash_Lookup(hash1,"irishmen"))
-//    {
-//        printf("here");
-//    }
-//    else
-//    {
-//        printf("not here");
-//    }
-
-
-    return 0;
-
-
-
-
-
-
-
-
-
+    printf("%d \n",bigcount);
 }
